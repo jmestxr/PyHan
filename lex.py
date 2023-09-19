@@ -98,12 +98,12 @@ class Lexer:
                 token = Token(lastChar + self.curChar, TokenType.NOTEQ)
             else:
                 self.abort("Expected !=, got !" + self.peekForward())
-        elif Lexer.isOpeningQuote(self.curChar):
+        elif Lexer.isquote(self.curChar):
             # Get characters between quotations.
             self.nextChar()
             startPos = self.curPos
 
-            while not Lexer.isClosingQuote(self.curChar):
+            while not Lexer.isquote(self.curChar):
                 # Don't allow special characters in the string. No escape characters, newlines, tabs, or %.
                 if self.curChar == '\r' or self.curChar == '\n' or self.curChar == '\t' or self.curChar == '\\' or self.curChar == '%':
                     self.abort("Illegal character in string.")
@@ -111,8 +111,6 @@ class Lexer:
 
             tokText = self.source[startPos : self.curPos] # Get the substring.
             token = Token(tokText, TokenType.STRING)
-        elif Lexer.isClosingQuote(self.curChar):
-            self.abort('Unexpected closing quote: ' + self.curChar)
         elif self.curChar.isdigit():
             # Leading character is a digit, so this must be a number.
             # Get all consecutive digits and decimal if there is one.
@@ -174,12 +172,8 @@ class Lexer:
         return char == '：' or char == ':'
     
     @staticmethod
-    def isOpeningQuote(char):
-        return char == '‘' or char == '“' or char == '\'' or char == '\"'
-
-    @staticmethod
-    def isClosingQuote(char):
-        return char == '’' or char == '”' or char == '\'' or char == '\"'
+    def isquote(char):
+        return char == '\"'
     
     
 # Token contains the original text, type of token and number of tokens.
