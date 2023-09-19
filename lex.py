@@ -169,7 +169,7 @@ class Lexer:
     
     @staticmethod
     def iscolon(char):
-        return char == '：' or char == ':'
+        return char == ':'
     
     @staticmethod
     def isquote(char):
