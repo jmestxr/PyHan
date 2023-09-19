@@ -144,9 +144,9 @@ class Lexer:
             token = Token(self.curChar, TokenType.NEWLINE)  
         elif Lexer.iscolon(self.curChar):
             token = Token(self.curChar, TokenType.COLON)
-        elif self.curChar.isspace():
+        elif Lexer.isspace(self.curChar):
             numSpaces = 1
-            while self.peekForward().isspace():
+            while Lexer.isspace(self.peekForward()):
                 self.nextChar()
                 numSpaces += 1
             token = Token(self.curChar, TokenType.SPACE, numSpaces)
