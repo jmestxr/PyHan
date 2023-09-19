@@ -1,0 +1,36 @@
+# program ::= {statement}
+
+# statement ::= 
+
+    # print
+    “印出”（expression | string）
+
+    # if/elif/else
+    “如果” comparison：nl
+    tab {statement}
+    "但如" comparison：nl
+    tab {statement}
+    “否则”：nl
+    tab {statement}
+
+    # while
+    “当” comparison：nl
+    tab {statement}
+
+    # assignment
+    ident "=" expression nl
+
+
+# comparison ::= expression (("==" | "!=" | ">" | ">=" | "<" | "<=") expression)+
+
+# expression ::= term {( "-" | "+" ) term}
+
+# term ::= unary {( "/" | "*" ) unary}
+
+# unary ::= ["+" | "-"] primary
+
+# primary ::= number | ident
+
+# nl ::= '\n'+
+
+# tab ::= 4 spaces / 1 tab
