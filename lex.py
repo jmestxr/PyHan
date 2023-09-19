@@ -9,10 +9,6 @@ class Lexer:
         self.curPos = -1    # Current position in the string.
         self.nextChar()
 
-        # Check for unexpected indentation at beginning of file
-        if self.curChar.isspace():
-            self.abort("IndentationError: unexpected indent")
-
     # Process the next character.
     def nextChar(self):
         self.curPos += 1
@@ -39,7 +35,7 @@ class Lexer:
 		
     # Skip whitespace except newlines, which we will use to indicate the end of a statement.
     def skipWhitespace(self):
-        while self.curChar == ' ' or self.curChar == '\t' or self.curChar == '\r':
+        while Lexer.isspace(self.curChar):
             self.nextChar()
 		
     # Skip comments in the code.
@@ -174,6 +170,10 @@ class Lexer:
     @staticmethod
     def isquote(char):
         return char == '\"'
+    
+    @staticmethod
+    def isspace(char):
+        return char == ' ' or char == '\t' or char == '\r'
     
     
 # Token contains the original text, type of token and number of tokens.
