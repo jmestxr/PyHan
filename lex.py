@@ -25,7 +25,7 @@ class Lexer:
     
     # Return the lookbackward character.
     def peekBackward(self):
-        if self.curPos <= 0:
+        if self.curPos <= 0 or self.curPos > len(self.source):
             return None
         return self.source[self.curPos - 1]
 
