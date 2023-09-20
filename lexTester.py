@@ -1,7 +1,8 @@
 from lex import *
+from log.lexLogger import lexLogger
 
 def main():
-    print("Py汉 compiler")
+    print("Py汉 lexer")
 
     source = ""
 
@@ -15,9 +16,9 @@ def main():
 
     lexer = Lexer(source)
 
-    token = lexer.getToken()
+    token = lexer.getToken() 
     while token.kind != TokenType.EOF:
-        print(token.kind, token.count)
+        lexLogger.info(f"{token.kind} {token.count}")
         token = lexer.getToken()
 
 main()

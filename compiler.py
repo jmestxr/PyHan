@@ -4,13 +4,15 @@ from parse import *
 import sys
 
 def main():
-    print("Teeny Tiny Compiler")
+    print("Py汉 compiler")
+
+    if len(sys.argv) != 3:
+        sys.exit("Error: Compiler needs both source file and output file as argument.")
+    
+    sourceFile, outputFile = sys.argv[1:]
 
     source = ""
-
-    if len(sys.argv) != 2:
-        sys.exit("Error: Compiler needs source file as argument.")
-    with open(sys.argv[1], 'r') as inputFile:
+    with open(sourceFile, 'r') as inputFile:
         # Remove blank lines
         for line in inputFile:
             if not line.isspace():
@@ -18,7 +20,7 @@ def main():
 
     # Initialize the lexer, emitter, and parser.
     lexer = Lexer(source)
-    emitter = Emitter("out.py")
+    emitter = Emitter(outputFile)
     parser = Parser(lexer, emitter)
 
     parser.program() # Start the parser.

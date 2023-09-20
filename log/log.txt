@@ -1,0 +1,30 @@
+From parser: 程序 (PROGRAM)
+From parser: 陈述-变量赋值 (STATEMENT-VARIABLE ASSIGNMENT)
+From parser: EXPRESSION
+From parser: TERM
+From parser: UNARY
+From parser: PRIMARY (5)
+From parser: 换行 (NEWLINE)
+From parser: 陈述-变量赋值 (STATEMENT-VARIABLE ASSIGNMENT)
+From parser: EXPRESSION
+From parser: TERM
+From parser: UNARY
+From parser: PRIMARY (阳)
+From parser: 换行 (NEWLINE)
+From parser: 陈述-如果 (STATEMENT-IF)
+From parser: COMPARISON
+From parser: EXPRESSION
+From parser: TERM
+From parser: UNARY
+From parser: PRIMARY (洋)
+From parser: EXPRESSION
+From parser: TERM
+From parser: UNARY
+From parser: PRIMARY (5)
+From parser: 换行 (NEWLINE)
+From parser: 陈述-印出 (STATEMENT-PRINT)
+From parser: EXPRESSION
+From parser: TERM
+From parser: UNARY
+From parser: PRIMARY (洋)
+From parser: 换行 (NEWLINE)

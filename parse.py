@@ -1,6 +1,7 @@
 import sys
 from lex import *
 from utils import getAlphaNumericVar
+from log.parseLogger import parseLogger
 
 # Parser object keeps track of current token and checks if the code matches the grammar.
 class Parser:
@@ -58,7 +59,7 @@ class Parser:
 
     # program ::= {statement}
     def program(self):
-        print("程序 (PROGRAM)")
+        parseLogger.info("程序 (PROGRAM)")
 
         # Since some newlines are required in our grammar, need to skip the excess.
         while self.checkToken(TokenType.NEWLINE):
@@ -81,7 +82,7 @@ class Parser:
 
         # “印出”（ expression | string ）+ nl
         if self.checkToken(TokenType.PRINT):
-            print("陈述-印出 (STATEMENT-PRINT)")
+            parseLogger.info("陈述-印出 (STATEMENT-PRINT)")
             self.nextToken()
 
             if self.checkToken(TokenType.STRING):
@@ -100,7 +101,7 @@ class Parser:
 
         # “如果” comparison：nl {statement}
         elif self.checkToken(TokenType.IF):
-            print("陈述-如果 (STATEMENT-IF)")
+            parseLogger.info("陈述-如果 (STATEMENT-IF)")
             self.nextToken()
             self.emitter.emit("if ")
             self.comparison()
@@ -122,7 +123,8 @@ class Parser:
 
         # “当” comparison：nl {statement}
         elif self.checkToken(TokenType.WHILE):
-            print("陈述-当 (STATEMENT-WHILE)")
+            parseLogger.info("陈述-当 (STATEMENT-WHILE)")
+
             self.nextToken()
             self.emitter.emit("while ")
             self.comparison()
@@ -144,7 +146,7 @@ class Parser:
 
         # Variable Assignment; ident "=" expression + nl
         elif self.checkToken(TokenType.IDENT):
-            print("陈述-变量赋值 (STATEMENT-VARIABLE ASSIGNMENT)")
+            parseLogger.info("陈述-变量赋值 (STATEMENT-VARIABLE ASSIGNMENT)")
 
             variable = getAlphaNumericVar(self.curToken.text)
             #  Check if ident exists in symbol table. If not, declare it.
@@ -161,7 +163,7 @@ class Parser:
 
     # comparison ::= expression (("==" | "!=" | ">" | ">=" | "<" | "<=") expression)+
     def comparison(self):
-        print("COMPARISON")
+        parseLogger.info("COMPARISON")
 
         self.expression()
         # Must be at least one comparison operator and another expression.
@@ -180,7 +182,7 @@ class Parser:
 
     # expression ::= term {( "-" | "+" ) term}
     def expression(self):
-        print("EXPRESSION")
+        parseLogger.info("EXPRESSION")
 
         self.term()
         # Can have 0 or more +/- and expressions.
@@ -191,7 +193,7 @@ class Parser:
 
     # term ::= unary {( "/" | "*" ) unary}
     def term(self):
-        print("TERM")
+        parseLogger.info("TERM")
 
         self.unary()
         # Can have 0 or more *// and expressions.
@@ -203,7 +205,7 @@ class Parser:
 
     # unary ::= ["+" | "-"] primary
     def unary(self):
-        print("UNARY")
+        parseLogger.info("UNARY")
 
         # Optional unary +/-
         if self.checkToken(TokenType.PLUS) or self.checkToken(TokenType.MINUS):
@@ -213,7 +215,7 @@ class Parser:
 
     # primary ::= number | ident
     def primary(self):
-        print("PRIMARY (" + self.curToken.text + ")")
+        parseLogger.info("PRIMARY (" + self.curToken.text + ")")
 
         if self.checkToken(TokenType.NUMBER): 
             self.emitter.emit(self.curToken.text)
@@ -232,7 +234,7 @@ class Parser:
     
     # nl ::= '\n'+
     def nl(self):
-        print("换行 (NEWLINE)")
+        parseLogger.info("换行 (NEWLINE)")
 		
         # Require at least one newline.
         self.match(TokenType.NEWLINE)
