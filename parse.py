@@ -91,9 +91,9 @@ class Parser:
 
             else:
                 # Expect an expression.
-                self.emitter.emit("print(\"")
+                self.emitter.emit("print(")
                 self.expression()
-                self.emitter.emit("\")")
+                self.emitter.emit(")")
             
             # Expect one or more newlines at the end
             self.nl()
@@ -150,7 +150,7 @@ class Parser:
             #  Check if ident exists in symbol table. If not, declare it.
             if variable not in self.symbols:
                 self.symbols.add(variable)
-                self.emitter.emit(variable + " = ")
+            self.emitter.emit(variable + "=")
 
             self.nextToken()
             self.match(TokenType.EQ)
