@@ -1,10 +1,12 @@
 import sys
 from lex import *
+from utils import getAlphaNumericVar
 
 # Parser object keeps track of current token and checks if the code matches the grammar.
 class Parser:
-    def __init__(self, lexer):
+    def __init__(self, lexer, emitter):
         self.lexer = lexer
+        self.emitter = emitter
 
         self.symbols = set()    # All variables we have declared so far.
 
@@ -84,11 +86,14 @@ class Parser:
 
             if self.checkToken(TokenType.STRING):
                 # Simple string.
+                self.emitter.emit("print(\"" + self.curToken.text + "\")")
                 self.nextToken()
 
             else:
                 # Expect an expression.
+                self.emitter.emit("print(\"")
                 self.expression()
+                self.emitter.emit("\")")
             
             # Expect one or more newlines at the end
             self.nl()
@@ -97,16 +102,20 @@ class Parser:
         elif self.checkToken(TokenType.IF):
             print("陈述-如果 (STATEMENT-IF)")
             self.nextToken()
+            self.emitter.emit("if ")
             self.comparison()
 
             self.match(TokenType.COLON)
-            self.nl()
+            self.emitter.emit(":")
 
+            self.nl()
+        
             if self.checkToken(TokenType.SPACE) and self.curToken.count > indentationSize:
                 statementIndentSize = self.curToken.count
 
                 # Zero or more statements in the body.
                 while self.checkToken(TokenType.SPACE) and self.curToken.count == statementIndentSize:
+                    self.emitter.emit(" " * statementIndentSize)
                     self.statement(statementIndentSize)
             else:
                 self.abort('缩进错误：在\'如果\'语句后需要一个缩进块 (IndentationError: expected an indented block after \'if\' statement)')
@@ -115,9 +124,12 @@ class Parser:
         elif self.checkToken(TokenType.WHILE):
             print("陈述-当 (STATEMENT-WHILE)")
             self.nextToken()
-            # self.comparison()
+            self.emitter.emit("while ")
+            self.comparison()
 
             self.match(TokenType.COLON)
+            self.emitter.emit(":")
+
             self.nl()
 
             if self.checkToken(TokenType.SPACE) and self.curToken.count > indentationSize:
@@ -125,16 +137,26 @@ class Parser:
 
                 # Zero or more statements in the loop body.
                 while self.checkToken(TokenType.SPACE) and self.curToken.count == statementIndentSize:
+                    self.emitter.emit(" " * statementIndentSize)
                     self.statement(statementIndentSize)
             else:
                 self.abort('缩进错误：在\'当\'语句后需要一个缩进块 (IndentationError: expected an indented block after \'while\' statement)')
 
-        # ident "=" expression + nl
+        # Variable Assignment; ident "=" expression + nl
         elif self.checkToken(TokenType.IDENT):
             print("陈述-变量赋值 (STATEMENT-VARIABLE ASSIGNMENT)")
+
+            variable = getAlphaNumericVar(self.curToken.text)
+            #  Check if ident exists in symbol table. If not, declare it.
+            if variable not in self.symbols:
+                self.symbols.add(variable)
+                self.emitter.emit(variable + " = ")
+
             self.nextToken()
             self.match(TokenType.EQ)
+
             self.expression()
+
             self.nl()
 
     # comparison ::= expression (("==" | "!=" | ">" | ">=" | "<" | "<=") expression)+
@@ -144,6 +166,7 @@ class Parser:
         self.expression()
         # Must be at least one comparison operator and another expression.
         if self.isComparisonOperator():
+            self.emitter.emit(self.curToken.text)
             self.nextToken()
             self.expression()
         else:
@@ -151,6 +174,7 @@ class Parser:
 
         # Can have 0 or more comparison operator and expressions.
         while self.isComparisonOperator():
+            self.emitter.emit(self.curToken.text)
             self.nextToken()
             self.expression()
 
@@ -161,6 +185,7 @@ class Parser:
         self.term()
         # Can have 0 or more +/- and expressions.
         while self.checkToken(TokenType.PLUS) or self.checkToken(TokenType.MINUS):
+            self.emitter.emit(self.curToken.text)
             self.nextToken()
             self.term()
 
@@ -171,6 +196,7 @@ class Parser:
         self.unary()
         # Can have 0 or more *// and expressions.
         while self.checkToken(TokenType.ASTERISK) or self.checkToken(TokenType.SLASH):
+            self.emitter.emit(self.curToken.text)
             self.nextToken()
             self.unary()
 
@@ -181,6 +207,7 @@ class Parser:
 
         # Optional unary +/-
         if self.checkToken(TokenType.PLUS) or self.checkToken(TokenType.MINUS):
+            self.emitter.emit(self.curToken.text)
             self.nextToken()        
         self.primary()
 
@@ -189,8 +216,15 @@ class Parser:
         print("PRIMARY (" + self.curToken.text + ")")
 
         if self.checkToken(TokenType.NUMBER): 
+            self.emitter.emit(self.curToken.text)
             self.nextToken()
         elif self.checkToken(TokenType.IDENT):
+            # Ensure the variable already exists.
+            variable = getAlphaNumericVar(self.curToken.text)
+            if variable not in self.symbols:
+                self.abort("Referencing variable before assignment: " + self.curToken.text)
+
+            self.emitter.emit(variable)
             self.nextToken()
         else:
             # Error!
@@ -202,6 +236,8 @@ class Parser:
 		
         # Require at least one newline.
         self.match(TokenType.NEWLINE)
+        self.emitter.emitLine("")
+
         # But we will allow extra newlines too, of course.
         while self.checkToken(TokenType.NEWLINE):
             self.nextToken()

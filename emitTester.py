@@ -1,10 +1,10 @@
 from lex import *
+from emit import *
 from parse import *
 import sys
-import os
 
 def main():
-    print("Py汉 compiler")
+    print("Teeny Tiny Compiler")
 
     source = ""
 
@@ -16,11 +16,13 @@ def main():
             if not line.isspace():
                 source += line
 
-    # Initialize the lexer and parser.
+    # Initialize the lexer, emitter, and parser.
     lexer = Lexer(source)
-    parser = Parser(lexer)
+    emitter = Emitter("out.py")
+    parser = Parser(lexer, emitter)
 
     parser.program() # Start the parser.
-    print("Parsing completed.")
+    emitter.writeFile() # Write the output to file.
+    print("Compiling completed.")
 
 main()
