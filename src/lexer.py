@@ -1,5 +1,11 @@
+import sys
+import os
+
+# appending the directory of parseLogger.py in the sys.path list
+sys.path.append(f"{os.path.dirname(__file__)}/../log")
+
 from lex import *
-from log.lexLogger import lexLogger
+from lexLogger import lexLogger
 
 def main():
     print("Py汉 lexer")

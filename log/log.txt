@@ -1,30 +1,19 @@
-From parser: 程序 (PROGRAM)
-From parser: 陈述-变量赋值 (STATEMENT-VARIABLE ASSIGNMENT)
-From parser: EXPRESSION
-From parser: TERM
-From parser: UNARY
-From parser: PRIMARY (5)
-From parser: 换行 (NEWLINE)
-From parser: 陈述-变量赋值 (STATEMENT-VARIABLE ASSIGNMENT)
-From parser: EXPRESSION
-From parser: TERM
-From parser: UNARY
-From parser: PRIMARY (阳)
-From parser: 换行 (NEWLINE)
-From parser: 陈述-如果 (STATEMENT-IF)
-From parser: COMPARISON
-From parser: EXPRESSION
-From parser: TERM
-From parser: UNARY
-From parser: PRIMARY (洋)
-From parser: EXPRESSION
-From parser: TERM
-From parser: UNARY
-From parser: PRIMARY (5)
-From parser: 换行 (NEWLINE)
-From parser: 陈述-印出 (STATEMENT-PRINT)
-From parser: EXPRESSION
-From parser: TERM
-From parser: UNARY
-From parser: PRIMARY (洋)
-From parser: 换行 (NEWLINE)
+From lexer: TokenType.IDENT 1
+From lexer: TokenType.EQ 1
+From lexer: TokenType.NUMBER 1
+From lexer: TokenType.NEWLINE 1
+From lexer: TokenType.IDENT 1
+From lexer: TokenType.EQ 1
+From lexer: TokenType.IDENT 1
+From lexer: TokenType.NEWLINE 1
+From lexer: TokenType.IF 1
+From lexer: TokenType.IDENT 1
+From lexer: TokenType.EQEQ 1
+From lexer: TokenType.NUMBER 1
+From lexer: TokenType.COLON 1
+From lexer: TokenType.NEWLINE 1
+From lexer: TokenType.SPACE 4
+From lexer: TokenType.PRINT 1
+From lexer: TokenType.IDENT 1
+From lexer: TokenType.NEWLINE 1
+From lexer: TokenType.NEWLINE 1
