@@ -5,7 +5,7 @@ import os
 sys.path.append(f"{os.path.dirname(__file__)}/../log")   
 
 from lex import *
-from src.utils import getAlphaNumericVar
+from utils import getAlphaNumericVar
 from parseLogger import parseLogger
 
 # Parser object keeps track of current token and checks if the code matches the grammar.

@@ -2,7 +2,7 @@
 
 # Directories
 SCRIPT_DIR=$(dirname "$0")
-PYHAN_COMPILER="${SCRIPT_DIR}/../compiler.py"
+PYHAN_COMPILER="${SCRIPT_DIR}/../src/compiler.py"
 TEST_FILES_DIR="${SCRIPT_DIR}/test-files"
 TEST_OUTDIR="${SCRIPT_DIR}/__test-outdir__"
 
