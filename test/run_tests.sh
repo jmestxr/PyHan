@@ -15,6 +15,10 @@ EXPECTED_DIR="${SCRIPT_DIR}/expected"
 # Create outdir if does not exist
 mkdir -p "${TEST_OUTDIR}"
 
+# Clear all files in __test-outdir__
+echo "Clearing all previous test output files..."
+rm ${TEST_OUTDIR}/*
+
 num_tests_failed=0
 
 echo "--------------------------------------------------------"
