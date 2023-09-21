@@ -17,7 +17,10 @@ mkdir -p "${TEST_OUTDIR}"
 
 # Clear all files in __test-outdir__
 echo "Clearing all previous test output files..."
-rm ${TEST_OUTDIR}/*
+if [ "$(ls -A "$TEST_OUTDIR")" ]
+then
+    rm ${TEST_OUTDIR}/*
+fi
 
 num_tests_failed=0
 
