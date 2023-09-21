@@ -150,6 +150,10 @@ class Lexer:
                 self.nextChar()
                 numSpaces += 1
             token = Token(self.curChar, TokenType.SPACE, numSpaces)
+        elif self.curChar == '(':
+            token = Token(self.curChar, TokenType.OPEN_BRACKET)
+        elif self.curChar == ')':
+            token = Token(self.curChar, TokenType.CLOSE_BRACKET)
         elif self.curChar == '\0':
             token = Token('', TokenType.EOF)
         else:
@@ -198,9 +202,11 @@ class TokenType(enum.Enum):
 	NEWLINE = 0
 	SPACE = 1
 	COLON = 2
-	NUMBER = 3
-	IDENT = 4
-	STRING = 5
+	OPEN_BRACKET = 3
+	CLOSE_BRACKET = 4
+	NUMBER = 5
+	IDENT = 6
+	STRING = 7
 	# Keywords.
 	PRINT = 101
 	IF = 102

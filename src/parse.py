@@ -88,18 +88,21 @@ class Parser:
         # “印出”（ expression | string ）+ nl
         if self.checkToken(TokenType.PRINT):
             parseLogger.info("陈述-印出 (STATEMENT-PRINT)")
+
             self.nextToken()
+            self.match(TokenType.OPEN_BRACKET)
 
             if self.checkToken(TokenType.STRING):
                 # Simple string.
                 self.emitter.emit("print(\"" + self.curToken.text + "\")")
                 self.nextToken()
-
             else:
                 # Expect an expression.
                 self.emitter.emit("print(")
                 self.expression()
                 self.emitter.emit(")")
+            
+            self.match(TokenType.CLOSE_BRACKET)
             
             # Expect one or more newlines at the end
             self.nl()
