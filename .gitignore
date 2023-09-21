@@ -1,6 +1,5 @@
-# all contents in test-outdir
+# test-outdir
 test/__test-outdir__/*
-!test/__test-outdir__/.gitkeep
 
 # log.txt
 log/log.txt

@@ -6,6 +6,9 @@ PYHAN_COMPILER="${SCRIPT_DIR}/../src/compiler.py"
 TEST_FILES_DIR="${SCRIPT_DIR}/test-files"
 TEST_OUTDIR="${SCRIPT_DIR}/__test-outdir__"
 
+# Create outdir if does not exist
+mkdir -p "${TEST_OUTDIR}"
+
 # Iterate over test files
 for test_file_path in "${TEST_FILES_DIR}"/*.pyhan; do
     test_file=$(basename "$test_file_path")
