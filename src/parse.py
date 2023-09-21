@@ -157,15 +157,16 @@ class Parser:
             parseLogger.info("陈述-变量赋值 (STATEMENT-VARIABLE ASSIGNMENT)")
 
             variable = getAlphaNumericVar(self.curToken.text)
-            #  Check if ident exists in symbol table. If not, declare it.
-            if variable not in self.symbols:
-                self.symbols.add(variable)
             self.emitter.emit(variable + "=")
 
             self.nextToken()
             self.match(TokenType.EQ)
 
             self.expression()
+
+            #  Check if ident exists in symbol table. If not, declare it.
+            if variable not in self.symbols:
+                self.symbols.add(variable)
 
             self.nl()
 
