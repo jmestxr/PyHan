@@ -57,7 +57,6 @@ while x < 5:
 ## Dev Guide
 
 ### Testing
-All test files are stored in `/test` directory. The test execution file is `test/run_tests.sh`. 
+Unit test cases are written with pytest. All test files are stored in `/test` directory. 
 
-Run `make -B test` to run all tests.
-
+Run `pytest` to run all tests.
