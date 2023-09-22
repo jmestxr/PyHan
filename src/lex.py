@@ -46,7 +46,7 @@ class Lexer:
 
     # Return the next token.
     def getToken(self):
-        if self.peekBackward() != '\n':
+        if self.peekBackward() and self.peekBackward() != '\n':
             self.skipWhitespace()
 
         self.skipComment()
