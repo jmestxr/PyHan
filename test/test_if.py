@@ -9,12 +9,12 @@ import pytest
 
 def test_basicComparison():
     input = """\
-如果 1 > 2:
+如果 (1 > 2):
     印出("1 > 2")\
 """
     actual = mock_compiler.compile(input)
     expected = """\
-if 1>2:
+if (1>2):
     print("1 > 2")
 """
 

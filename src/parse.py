@@ -170,9 +170,21 @@ class Parser:
 
             self.nl()
 
+        # This is not a valid statement. Error!
+        else:
+            self.abort("Invalid statement at " + self.curToken.text + " (" + self.curToken.kind.name + ")")
+
     # comparison ::= expression (("==" | "!=" | ">" | ">=" | "<" | "<=") expression)+
     def comparison(self):
         parseLogger.info("COMPARISON")
+
+        hasParenthesis = False
+        
+        # Optional parenthesis
+        if self.checkToken(TokenType.OPEN_BRACKET):
+            hasParenthesis = True
+            self.emitter.emit(self.curToken.text)
+            self.nextToken()
 
         self.expression()
         # Must be at least one comparison operator and another expression.
@@ -184,19 +196,40 @@ class Parser:
             self.abort("Expected comparison operator at: " + self.curToken.text)
 
         # Can have 0 or more comparison operator and expressions.
-        while self.isComparisonOperator():
+        while (hasParenthesis and self.checkToken(TokenType.CLOSE_BRACKET)) \
+              or self.isComparisonOperator():
             self.emitter.emit(self.curToken.text)
+
+            if self.checkToken(TokenType.CLOSE_BRACKET):
+                self.nextToken()
+                break
+            
             self.nextToken()
             self.expression()
 
-    # expression ::= term {( "-" | "+" ) term}
+    # expression ::= [(] term {( "-" | "+" ) term} [)]
     def expression(self):
         parseLogger.info("EXPRESSION")
 
-        self.term()
-        # Can have 0 or more +/- and expressions.
-        while self.checkToken(TokenType.PLUS) or self.checkToken(TokenType.MINUS):
+        hasParenthesis = False
+        
+        # Optional parenthesis
+        if self.checkToken(TokenType.OPEN_BRACKET):
+            hasParenthesis = True
             self.emitter.emit(self.curToken.text)
+            self.nextToken()
+
+        self.term()
+        # Can have optional parenthesis, or 0 or more +/- and expressions.
+        while (hasParenthesis and self.checkToken(TokenType.CLOSE_BRACKET)) \
+              or self.checkToken(TokenType.PLUS) \
+              or self.checkToken(TokenType.MINUS):
+            self.emitter.emit(self.curToken.text)
+
+            if self.checkToken(TokenType.CLOSE_BRACKET):
+                self.nextToken()
+                break
+
             self.nextToken()
             self.term()
 

@@ -7,11 +7,11 @@ from mocks import mock_compiler
 
 def test_printArithmetic():
     input = """\
-印出(5+2-3)\
+印出((5+2-3))\
 """
     actual = mock_compiler.compile(input)
     expected = """\
-print(5+2-3)
+print((5+2-3))
 """
     
     assert actual == expected
