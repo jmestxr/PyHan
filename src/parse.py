@@ -1,5 +1,6 @@
 import sys
 import os
+from tokenize import TokenError
 
 # appending the directory of parseLogger.py in the sys.path list
 sys.path.append(f"{os.path.dirname(__file__)}/../log")   
@@ -127,7 +128,7 @@ class Parser:
                     self.emitter.emit(" " * statementIndentSize)
                     self.statement(statementIndentSize)
             else:
-                self.abort('缩进错误：在\'如果\'语句后需要一个缩进块 (IndentationError: expected an indented block after \'if\' statement)')
+                self.abort('缩进错误：在\'如果\'语句后需要一个缩进块 (IndentatilonError: expected an indented block after \'if\' statement)')
 
         # “当” comparison：nl {statement}
         elif self.checkToken(TokenType.WHILE):
@@ -152,15 +153,17 @@ class Parser:
             else:
                 self.abort('缩进错误：在\'当\'语句后需要一个缩进块 (IndentationError: expected an indented block after \'while\' statement)')
 
-        # Variable Assignment; ident "=" expression + nl
-        elif self.checkToken(TokenType.IDENT):
+        # Variable Assignment: ident "=" expression + nl
+        elif self.checkToken(TokenType.IDENT) and self.peekToken.kind == TokenType.EQ:
             parseLogger.info("陈述-变量赋值 (STATEMENT-VARIABLE ASSIGNMENT)")
 
             variable = getAlphaNumericVar(self.curToken.text)
-            self.emitter.emit(variable + "=")
+            self.emitter.emit(variable)
 
             self.nextToken()
             self.match(TokenType.EQ)
+
+            self.emitter.emit("=")
 
             self.expression()
 
@@ -170,11 +173,11 @@ class Parser:
 
             self.nl()
 
-        # This is not a valid statement. Error!
         else:
-            self.abort("Invalid statement at " + self.curToken.text + " (" + self.curToken.kind.name + ")")
+            self.comparison()
+            self.nl()
 
-    # comparison ::= expression (("==" | "!=" | ">" | ">=" | "<" | "<=") expression)+
+    # comparison ::= [(] expression (("==" | "!=" | ">" | ">=" | "<" | "<=") expression) [)]
     def comparison(self):
         parseLogger.info("COMPARISON")
 
@@ -187,13 +190,6 @@ class Parser:
             self.nextToken()
 
         self.expression()
-        # Must be at least one comparison operator and another expression.
-        if self.isComparisonOperator():
-            self.emitter.emit(self.curToken.text)
-            self.nextToken()
-            self.expression()
-        else:
-            self.abort("Expected comparison operator at: " + self.curToken.text)
 
         # Can have 0 or more comparison operator and expressions.
         while (hasParenthesis and self.checkToken(TokenType.CLOSE_BRACKET)) \
