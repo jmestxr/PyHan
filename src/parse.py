@@ -9,8 +9,10 @@ from lex import *
 from utils import getAlphaNumericVar
 from parseLogger import parseLogger
 
-# Parser object keeps track of current token and checks if the code matches the grammar.
 class Parser:
+    """
+    Parser object keeps track of current token and checks if the code matches the grammar.
+    """
     def __init__(self, lexer, emitter):
         self.lexer = lexer
         self.emitter = emitter
@@ -22,16 +24,22 @@ class Parser:
         self.nextToken()
         self.nextToken()    # Call this twice to initialize current and peek.
     
-    # Return true if the current token matches.
     def checkToken(self, kind):
+        """
+        Return true if the current token matches.
+        """
         return kind == self.curToken.kind
 
-    # Return true if the next token matches.
     def checkPeek(self, kind):
+        """
+        Return true if the next token matches.
+        """
         return kind == self.peekToken.kind
 
-    # Try to match current token. If not, error. Advances the current token.
     def match(self, kind):
+        """
+        Try to match current token. If not, error. Advances the current token.
+        """
         if not self.checkToken(kind):
             self.abort("Expected " + kind.name + ", got " + self.curToken.kind.name)
         self.nextToken()
@@ -47,14 +55,18 @@ class Parser:
         if self.curToken.count != indentationSize:
             self.abort("Wrong amount of indentation given at " + self.curToken.text)
 
-    # Advances the current token.
     def nextToken(self):
+        """
+        Advances the current token.
+        """
         self.curToken = self.peekToken
         self.peekToken = self.lexer.getToken()
         # No need to worry about passing the EOF, lexer handles that.
 
-    # Return true if the current token is a comparison operator.
     def isComparisonOperator(self):
+        """
+        Return true if the current token is a comparison operator.
+        """
         return self.checkToken(TokenType.GT) or self.checkToken(TokenType.GTEQ) or self.checkToken(TokenType.LT) or self.checkToken(TokenType.LTEQ) or self.checkToken(TokenType.EQEQ) or self.checkToken(TokenType.NOTEQ)
 
     def abort(self, message):
@@ -63,8 +75,10 @@ class Parser:
 
     # Production rules.
 
-    # program ::= {statement}
     def program(self):
+        """
+        program ::= {statement}
+        """
         parseLogger.info("程序 (PROGRAM)")
 
         # Since some newlines are required in our grammar, need to skip the excess.
@@ -75,8 +89,16 @@ class Parser:
         while not self.checkToken(TokenType.EOF):
             self.statement()
 
-    # One of the following statements...
+
     def statement(self, indentationSize = 0):
+        """
+        One of the following statements...
+        - PRINT: “印出”（ expression | string ）+ nl
+        - IF: “如果” comparison：nl {statement}
+        - WHILE: “当” comparison：nl {statement}
+        - VARIABLE ASSIGNMENT: ident "=" expression + nl
+        - EXPRESSION
+        """
         # Check that the number of spaces at beginning of statement
         # corresponds to expected indentation size
         self.checkIndentation(indentationSize)
@@ -113,7 +135,7 @@ class Parser:
             parseLogger.info("陈述-如果 (STATEMENT-IF)")
             self.nextToken()
             self.emitter.emit("if ")
-            self.comparison()
+            self.expression()
 
             self.match(TokenType.COLON)
             self.emitter.emit(":")
@@ -136,7 +158,7 @@ class Parser:
 
             self.nextToken()
             self.emitter.emit("while ")
-            self.comparison()
+            self.expression()
 
             self.match(TokenType.COLON)
             self.emitter.emit(":")
@@ -174,75 +196,47 @@ class Parser:
             self.nl()
 
         else:
-            self.comparison()
+            self.expression()
             self.nl()
 
-    # comparison ::= [(] expression (("==" | "!=" | ">" | ">=" | "<" | "<=") expression) [)]
-    def comparison(self):
-        parseLogger.info("COMPARISON")
 
-        hasParenthesis = False
-        
-        # Optional parenthesis
-        if self.checkToken(TokenType.OPEN_BRACKET):
-            hasParenthesis = True
-            self.emitter.emit(self.curToken.text)
-            self.nextToken()
-
-        self.expression()
-
-        # Can have 0 or more comparison operator and expressions.
-        while (hasParenthesis and self.checkToken(TokenType.CLOSE_BRACKET)) \
-              or self.isComparisonOperator():
-            self.emitter.emit(self.curToken.text)
-
-            if self.checkToken(TokenType.CLOSE_BRACKET):
-                self.nextToken()
-                break
-            
-            self.nextToken()
-            self.expression()
-
-    # expression ::= [(] term {( "-" | "+" ) term} [)]
     def expression(self):
-        parseLogger.info("EXPRESSION")
-
-        hasParenthesis = False
-        
-        # Optional parenthesis
-        if self.checkToken(TokenType.OPEN_BRACKET):
-            hasParenthesis = True
-            self.emitter.emit(self.curToken.text)
-            self.nextToken()
+        """
+        Any of the following:
+        - expression ::= term {( "-" | "+" ) term}
+        - comparison (special kind of expression) ::= 
+            term (("==" | "!=" | ">" | ">=" | "<" | "<=") term)
+        """
+        parseLogger.info("EXPRESSION/COMPARISON")
 
         self.term()
-        # Can have optional parenthesis, or 0 or more +/- and expressions.
-        while (hasParenthesis and self.checkToken(TokenType.CLOSE_BRACKET)) \
-              or self.checkToken(TokenType.PLUS) \
-              or self.checkToken(TokenType.MINUS):
+        # Can have 0 or more +,-,==,!=,>,>=,<,<= and expressions.
+        while self.checkToken(TokenType.PLUS) or self.checkToken(TokenType.MINUS):
             self.emitter.emit(self.curToken.text)
-
-            if self.checkToken(TokenType.CLOSE_BRACKET):
-                self.nextToken()
-                break
-
             self.nextToken()
             self.term()
 
-    # term ::= unary {( "/" | "*" ) unary}
+
     def term(self):
+        """
+        term ::= unary {( "/" | "*" ) unary}
+        """
         parseLogger.info("TERM")
 
         self.unary()
         # Can have 0 or more *// and expressions.
-        while self.checkToken(TokenType.ASTERISK) or self.checkToken(TokenType.SLASH):
+        while self.checkToken(TokenType.ASTERISK)\
+                or self.checkToken(TokenType.SLASH)\
+                or self.isComparisonOperator():
             self.emitter.emit(self.curToken.text)
             self.nextToken()
             self.unary()
 
 
-    # unary ::= ["+" | "-"] primary
     def unary(self):
+        """
+        unary ::= ["+" | "-"] primary
+        """
         parseLogger.info("UNARY")
 
         # Optional unary +/-
@@ -251,9 +245,12 @@ class Parser:
             self.nextToken()        
         self.primary()
 
-    # primary ::= number | ident
+
     def primary(self):
-        parseLogger.info("PRIMARY (" + self.curToken.text + ")")
+        """
+        primary ::= number | ident | LPAREN expr RPAREN
+        """
+        parseLogger.info("PRIMARY")
 
         if self.checkToken(TokenType.NUMBER): 
             self.emitter.emit(self.curToken.text)
@@ -266,12 +263,23 @@ class Parser:
 
             self.emitter.emit(variable)
             self.nextToken()
+        elif self.checkToken(TokenType.OPEN_BRACKET):
+            self.emitter.emit(self.curToken.text)
+            self.nextToken()
+
+            self.expression()
+
+            self.match(TokenType.CLOSE_BRACKET)
+            self.emitter.emit(")")
         else:
             # Error!
             self.abort("Unexpected token at " + self.curToken.text)
-    
-    # nl ::= '\n'+
+
+
     def nl(self):
+        """
+        nl ::= '\n'+
+        """
         parseLogger.info("换行 (NEWLINE)")
 		
         # Require at least one newline.

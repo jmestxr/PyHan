@@ -13,18 +13,16 @@ def test_numberWithoutBrackets():
     expected = """\
 1
 """
-
     assert actual == expected
 
 def test_numberWithBrackets():
     input = """\
-(1)\
+(((((1)))))\
 """
     actual = mock_compiler.compile(input)
     expected = """\
-(1)
+(((((1)))))
 """
-
     assert actual == expected
 
 def test_arithmeticWithoutBrackets():
@@ -35,18 +33,36 @@ def test_arithmeticWithoutBrackets():
     expected = """\
 1+1*1/1
 """
-
     assert actual == expected
 
-def test_arithmeticWithBrackets():
+def test_arithmeticWithBrackets1():
     input = """\
-(1+1*1/1)\
+(1+(1)*1/((1)))\
 """
     actual = mock_compiler.compile(input)
     expected = """\
-(1+1*1/1)
+(1+(1)*1/((1)))
 """
+    assert actual == expected
 
+def test_arithmeticWithBrackets2():
+    input = """\
+(1+1)*((1/1))\
+"""
+    actual = mock_compiler.compile(input)
+    expected = """\
+(1+1)*((1/1))
+"""
+    assert actual == expected
+
+def test_arithmeticWithBrackets3():
+    input = """\
+7 + 3 * (10 / (12 / (3 + 1) - 1))\
+"""
+    actual = mock_compiler.compile(input)
+    expected = """\
+7+3*(10/(12/(3+1)-1))
+"""
     assert actual == expected
 
 def test_variableWithoutBrackets():
@@ -59,7 +75,6 @@ def test_variableWithoutBrackets():
 shumu_2587044c9663e086a82fb5ad144e94493ee7e879169936b5a615c0ae047e7d15=1
 shumu_2587044c9663e086a82fb5ad144e94493ee7e879169936b5a615c0ae047e7d15
 """
-
     assert actual == expected
 
 def test_variableWithBrackets():
@@ -72,7 +87,6 @@ def test_variableWithBrackets():
 shumu_2587044c9663e086a82fb5ad144e94493ee7e879169936b5a615c0ae047e7d15=1
 (shumu_2587044c9663e086a82fb5ad144e94493ee7e879169936b5a615c0ae047e7d15)
 """
-
     assert actual == expected
 
 def test_comparisonWithoutBrackets():
@@ -83,7 +97,6 @@ def test_comparisonWithoutBrackets():
     expected = """\
 2>1
 """
-
     assert actual == expected
 
 def test_comparisonWithBrackets():
@@ -94,5 +107,4 @@ def test_comparisonWithBrackets():
     expected = """\
 (2>1)
 """
-
     assert actual == expected
