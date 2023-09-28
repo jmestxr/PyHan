@@ -136,10 +136,13 @@ class Lexer:
             # Check if the token is in the list of keywords.
             tokText = self.source[startPos : self.curPos + 1] # Get the substring.
             keyword = Token.checkIfKeyword(tokText)
-            if keyword == None: # Identifier
-                token = Token(tokText, TokenType.IDENT)
-            else:   # Keyword
+            logicalOperator = Token.checkIfLogicalOperator(tokText)
+            if keyword: # Keyword
                 token = Token(tokText, keyword)
+            elif logicalOperator: # Logical Operator
+                token = Token(tokText, logicalOperator)
+            else:   # Identifier
+                token = Token(tokText, TokenType.IDENT)
         elif self.curChar == '\n':
             token = Token(self.curChar, TokenType.NEWLINE)  
         elif Lexer.iscolon(self.curChar):
@@ -194,6 +197,14 @@ class Token:
             if kind.value >= 100 and kind.value < 200 and ChineseKeywords[kind.name] == tokenText:
                 return kind
         return None
+    
+    @staticmethod
+    def checkIfLogicalOperator(tokenText):
+        for kind in TokenType:
+            # Relies on all keyword enum values being 3XX.
+            if kind.value >= 300 and ChineseLogicalOperators[kind.name] == tokenText:
+                return kind
+        return None
 
 
 # TokenType is our enum for all the types of tokens.
@@ -223,9 +234,19 @@ class TokenType(enum.Enum):
 	LTEQ = 209
 	GT = 210
 	GTEQ = 211
+    # Logical Operators.
+	AND = 301
+	OR = 302
+	NOT = 303
 
 ChineseKeywords = {
     "PRINT": "印出",
     "IF": "如果",
     "WHILE": "当"
+}
+
+ChineseLogicalOperators = {
+    "AND": "与",
+    "OR": "或",
+    "NOT": "非"
 }

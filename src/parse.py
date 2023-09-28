@@ -59,15 +59,32 @@ class Parser:
         """
         Advances the current token.
         """
+         # No need to worry about passing the EOF, lexer handles that.
         self.curToken = self.peekToken
         self.peekToken = self.lexer.getToken()
-        # No need to worry about passing the EOF, lexer handles that.
+        if self.curToken and self.peekToken\
+            and (self.isComparisonOperator() or self.isArithmeticOperator())\
+            and self.isLogicalOperator(self.peekToken):
+            self.abort("SyntaxError: invalid syntax")
 
     def isComparisonOperator(self):
         """
         Return true if the current token is a comparison operator.
         """
         return self.checkToken(TokenType.GT) or self.checkToken(TokenType.GTEQ) or self.checkToken(TokenType.LT) or self.checkToken(TokenType.LTEQ) or self.checkToken(TokenType.EQEQ) or self.checkToken(TokenType.NOTEQ)
+
+    def isArithmeticOperator(self):
+        """
+        Return true if the current token is a arithmetic operator.
+        """
+        return self.checkToken(TokenType.PLUS) or self.checkToken(TokenType.MINUS) or self.checkToken(TokenType.ASTERISK) or self.checkToken(TokenType.SLASH)
+
+    def isLogicalOperator(self, token):
+        """
+        Return true if the specified token is a logical operator.
+        """
+        return token.kind == TokenType.AND or token.kind == TokenType.OR or token.kind == TokenType.NOT
+
 
     def abort(self, message):
         sys.exit("Error. " + message)
@@ -206,13 +223,23 @@ class Parser:
         - expression ::= term {( "-" | "+" ) term}
         - comparison (special kind of expression) ::= 
             term (("==" | "!=" | ">" | ">=" | "<" | "<=") term)
+        - logical (special kind of expression) ::=
+            term(("与" | "或") term)
         """
         parseLogger.info("EXPRESSION/COMPARISON")
 
         self.term()
-        # Can have 0 or more +,-,==,!=,>,>=,<,<= and expressions.
-        while self.checkToken(TokenType.PLUS) or self.checkToken(TokenType.MINUS):
-            self.emitter.emit(self.curToken.text)
+        # Can have 0 or more +,-,==,!=,>,>=,<,<=,与,或 expressions.
+        while self.checkToken(TokenType.PLUS)\
+                or self.checkToken(TokenType.MINUS)\
+                or self.isComparisonOperator()\
+                or self.checkToken(TokenType.AND) or self.checkToken(TokenType.OR):
+            if self.checkToken(TokenType.AND):
+                self.emitter.emit(" and ")
+            elif self.checkToken(TokenType.OR):
+                self.emitter.emit(" or ")
+            else:
+                self.emitter.emit(self.curToken.text)
             self.nextToken()
             self.term()
 
@@ -224,10 +251,8 @@ class Parser:
         parseLogger.info("TERM")
 
         self.unary()
-        # Can have 0 or more *// and expressions.
-        while self.checkToken(TokenType.ASTERISK)\
-                or self.checkToken(TokenType.SLASH)\
-                or self.isComparisonOperator():
+        # Can have 0 or more *// expressions.
+        while self.checkToken(TokenType.ASTERISK) or self.checkToken(TokenType.SLASH):
             self.emitter.emit(self.curToken.text)
             self.nextToken()
             self.unary()
@@ -235,14 +260,19 @@ class Parser:
 
     def unary(self):
         """
-        unary ::= ["+" | "-"] primary
+        unary ::= ["+" | "-" | "非"] primary
         """
         parseLogger.info("UNARY")
 
-        # Optional unary +/-
-        if self.checkToken(TokenType.PLUS) or self.checkToken(TokenType.MINUS):
-            self.emitter.emit(self.curToken.text)
-            self.nextToken()        
+        # Optional unary +/-/非
+        if self.checkToken(TokenType.PLUS)\
+            or self.checkToken(TokenType.MINUS)\
+            or self.checkToken(TokenType.NOT):
+            if self.checkToken(TokenType.NOT):
+                self.emitter.emit("not ")
+            else:
+                self.emitter.emit(self.curToken.text)
+            self.nextToken()       
         self.primary()
 
 
