@@ -56,15 +56,16 @@ while x < 5:
   x = x + 1
 ```
 
-### Usage
+## Usage
 
 1. Clone this repo.
 1. Run `python setup.py sdist` in the root directory.
+1. Run `pip install .` to install Py汉 CLI.
 1. Confirm that the package is installed correctly by running `pyhan` command:
    
 <img width="688" alt="Screenshot 2023-09-29 at 6 31 36 PM" src="https://github.com/jmestxr/PyHan/assets/87931905/0b4afc19-e090-40c7-ac1a-7da2059418b4">
 
-#### Example:
+### Example:
 To execute the above `example.pyhan` script directly, run
 
 ```
