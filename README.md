@@ -56,6 +56,33 @@ while x < 5:
   x = x + 1
 ```
 
+### Usage
+
+1. Clone this repo.
+1. Run `python setup.py sdist` in the root directory.
+1. Confirm that the package is installed correctly by running `pyhan` command:
+
+
+#### Example:
+To execute the above `example.pyhan` script directly, run
+
+```
+pyhan example.pyhan
+```
+
+To compile .pyhan script without executing, use the `--compile` or `-c` option. The compiled .py script will be saved to `./out.py` by default.
+
+```
+pyhan example.pyhan -c
+```
+
+You can specify the desired file path of the compiled .py script using the `--output` or `-o` option.
+
+```
+pyhan example.pyhan -c -o example.py
+```
+
+
 ## Dev Guide
 
 ### Testing

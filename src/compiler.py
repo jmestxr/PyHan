@@ -3,18 +3,14 @@ from emit import *
 from parse import *
 import sys
 
-def main():
-    print("Py汉 compiler")
-
-    if len(sys.argv) != 3:
+def compile(inputFile, outputFile):
+    if not inputFile or not outputFile:
         sys.exit("Error: Compiler needs both source file and output file as argument.")
-    
-    sourceFile, outputFile = sys.argv[1:]
 
     source = ""
-    with open(sourceFile, 'r') as inputFile:
+    with open(inputFile, 'r') as sourceFile:
         # Remove blank lines
-        for line in inputFile:
+        for line in sourceFile:
             if not line.isspace():
                 source += line
 
@@ -25,6 +21,3 @@ def main():
 
     parser.program() # Start the parser.
     emitter.writeFile() # Write the output to file.
-    print("Compiling completed.")
-
-main()

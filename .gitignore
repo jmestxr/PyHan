@@ -1,3 +1,5 @@
+requirements.txt
+
 # test-outdir
 test/__test-outdir__/*
 
