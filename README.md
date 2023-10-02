@@ -29,7 +29,7 @@ Starter code is obtained from [this tutorial](https://austinhenley.com/blog/teen
 Here are the list of syntax currently supported:
 
 - `print` statement - `印出`
-- `if` statement - `如果`
+- `if/elif/else` block - `如果/或则/否则`
 - `while` loop - `当`
 - Logical operators (`and`, `or`, `not`) - `与`, `或`, `非`
 - Variable assignment
@@ -63,7 +63,7 @@ while x < 5:
 1. Run `pip install .` to install Py汉 CLI.
 1. Confirm that the package is installed correctly by running `pyhan` command:
    
-<img width="688" alt="Screenshot 2023-09-29 at 6 31 36 PM" src="https://github.com/jmestxr/PyHan/assets/87931905/0b4afc19-e090-40c7-ac1a-7da2059418b4">
+<img width="688" alt="expected output of running pyhan command" src="https://github.com/jmestxr/PyHan/assets/87931905/0b4afc19-e090-40c7-ac1a-7da2059418b4">
 
 ### Example:
 To execute the above `example.pyhan` script directly, run
@@ -84,8 +84,13 @@ You can specify the desired file path of the compiled .py script using the `--ou
 pyhan example.pyhan -c -o example.py
 ```
 
+### Delete Py汉 CLI package
+Run `python -m pip uninstall pyhan`.
 
 ## Dev Guide
+
+### Compiling a test.pyhan script
+Run `python cli/pyhan_cli.py test.pyhan -c`. Compiled python script will be in `./out.py`.
 
 ### Testing
 Unit test cases are written with pytest. All test files are stored in `/test` directory. 
