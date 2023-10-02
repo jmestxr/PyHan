@@ -221,7 +221,9 @@ class TokenType(enum.Enum):
 	# Keywords.
 	PRINT = 101
 	IF = 102
-	WHILE = 103
+	ELIF = 103
+	ELSE = 104
+	WHILE = 105
 	# Operators.
 	EQ = 201  
 	PLUS = 202
@@ -242,6 +244,8 @@ class TokenType(enum.Enum):
 ChineseKeywords = {
     "PRINT": "印出",
     "IF": "如果",
+    "ELIF": "或则",
+    "ELSE": "否则",
     "WHILE": "当"
 }
 

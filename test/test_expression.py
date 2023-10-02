@@ -144,7 +144,7 @@ def test_lessThanEqual():
 """
     assert actual == expected
 
-def test_equalEqual():
+def test_equalequal():
     input = """\
 2==1\
 """
@@ -171,6 +171,21 @@ def test_comparisonWithBrackets():
     actual = mock_compiler.compile(input)
     expected = """\
 (2>1)
+"""
+    assert actual == expected
+
+
+def test_variableComparison():
+    input = """\
+阳 = 5
+洋 = 5
+洋 == 阳\
+"""
+    actual = mock_compiler.compile(input)
+    expected = """\
+yang_65e20c27a154dfe12117f65b731513990bddf795faeb56db0a733734373aef17=5
+yang_49a1fcbe2bc4c581f3726bbddea023f53ba4023239e28e3ec7328bd59a79893b=5
+yang_49a1fcbe2bc4c581f3726bbddea023f53ba4023239e28e3ec7328bd59a79893b==yang_65e20c27a154dfe12117f65b731513990bddf795faeb56db0a733734373aef17
 """
     assert actual == expected
 

@@ -24,13 +24,13 @@ class Parser:
         self.nextToken()
         self.nextToken()    # Call this twice to initialize current and peek.
     
-    def checkToken(self, kind):
+    def isCurTokenOfKind(self, kind):
         """
         Return true if the current token matches.
         """
         return kind == self.curToken.kind
 
-    def checkPeek(self, kind):
+    def isPeekTokenOfKind(self, kind):
         """
         Return true if the next token matches.
         """
@@ -40,20 +40,31 @@ class Parser:
         """
         Try to match current token. If not, error. Advances the current token.
         """
-        if not self.checkToken(kind):
+        if not self.isCurTokenOfKind(kind):
             self.abort("Expected " + kind.name + ", got " + self.curToken.kind.name)
         self.nextToken()
 
-    def checkIndentation(self, indentationSize):
+    def hasIndentation(self, indentationSize):
         if indentationSize == 0:
-            if self.checkToken(TokenType.SPACE):
+            if self.isCurTokenOfKind(TokenType.SPACE):
+                return False
+            return True
+
+        if not self.isCurTokenOfKind(TokenType.SPACE) or self.curToken.count != indentationSize:
+            return False
+        return True
+
+    def hasIndentationOrAbort(self, indentationSize):
+        if indentationSize == 0:
+            if self.isCurTokenOfKind(TokenType.SPACE):
                 self.abort("Unexpected indentation at " + self.curToken.text)
             return
 
-        if not self.checkToken(TokenType.SPACE):
+        if not self.isCurTokenOfKind(TokenType.SPACE):
             self.abort("Expected indentation at " + self.curToken.text) 
         if self.curToken.count != indentationSize:
             self.abort("Wrong amount of indentation given at " + self.curToken.text)
+        self.nextToken()
 
     def nextToken(self):
         """
@@ -71,13 +82,13 @@ class Parser:
         """
         Return true if the current token is a comparison operator.
         """
-        return self.checkToken(TokenType.GT) or self.checkToken(TokenType.GTEQ) or self.checkToken(TokenType.LT) or self.checkToken(TokenType.LTEQ) or self.checkToken(TokenType.EQEQ) or self.checkToken(TokenType.NOTEQ)
+        return self.isCurTokenOfKind(TokenType.GT) or self.isCurTokenOfKind(TokenType.GTEQ) or self.isCurTokenOfKind(TokenType.LT) or self.isCurTokenOfKind(TokenType.LTEQ) or self.isCurTokenOfKind(TokenType.EQEQ) or self.isCurTokenOfKind(TokenType.NOTEQ)
 
     def isArithmeticOperator(self):
         """
         Return true if the current token is a arithmetic operator.
         """
-        return self.checkToken(TokenType.PLUS) or self.checkToken(TokenType.MINUS) or self.checkToken(TokenType.ASTERISK) or self.checkToken(TokenType.SLASH)
+        return self.isCurTokenOfKind(TokenType.PLUS) or self.isCurTokenOfKind(TokenType.MINUS) or self.isCurTokenOfKind(TokenType.ASTERISK) or self.isCurTokenOfKind(TokenType.SLASH)
 
     def isLogicalOperator(self, token):
         """
@@ -85,6 +96,20 @@ class Parser:
         """
         return token.kind == TokenType.AND or token.kind == TokenType.OR or token.kind == TokenType.NOT
 
+    def parseStatementsInBlock(self, indentationSize: int) -> None:
+        """Get statements in a block.
+
+        Parameters:
+        indentationSize (int): The minimum indentation size of each statement.
+        """
+        if self.isCurTokenOfKind(TokenType.SPACE) and self.curToken.count >= indentationSize:
+                statementIndentSize = self.curToken.count
+
+                # One or more statements in the body.
+                while self.isCurTokenOfKind(TokenType.SPACE) and self.curToken.count == statementIndentSize:
+                    self.statement(statementIndentSize)
+        else:
+            self.abort("IndentationError: expected an indented block")
 
     def abort(self, message):
         sys.exit("Error. " + message)
@@ -99,13 +124,13 @@ class Parser:
         parseLogger.info("程序 (PROGRAM)")
 
         # Since some newlines are required in our grammar, need to skip the excess.
-        while self.checkToken(TokenType.NEWLINE):
+        while self.isCurTokenOfKind(TokenType.NEWLINE):
             self.nextToken()
 
         # Parse all the statements in the program.
-        while not self.checkToken(TokenType.EOF):
+        while not self.isCurTokenOfKind(TokenType.EOF):
             self.statement()
-
+            
 
     def statement(self, indentationSize = 0):
         """
@@ -118,21 +143,19 @@ class Parser:
         """
         # Check that the number of spaces at beginning of statement
         # corresponds to expected indentation size
-        self.checkIndentation(indentationSize)
-
-        if indentationSize > 0:
-            self.nextToken()
+        self.hasIndentationOrAbort(indentationSize)
+        self.emitter.emit(" " * indentationSize)
 
         # Check the first token to see what kind of statement this is.
 
         # “印出”（ expression | string ）+ nl
-        if self.checkToken(TokenType.PRINT):
-            parseLogger.info("陈述-印出 (STATEMENT-PRINT)")
+        if self.isCurTokenOfKind(TokenType.PRINT):
+            parseLogger.info("STATEMENT-PRINT")
 
             self.nextToken()
             self.match(TokenType.OPEN_BRACKET)
 
-            if self.checkToken(TokenType.STRING):
+            if self.isCurTokenOfKind(TokenType.STRING):
                 # Simple string.
                 self.emitter.emit("print(\"" + self.curToken.text + "\")")
                 self.nextToken()
@@ -148,29 +171,59 @@ class Parser:
             self.nl()
 
         # “如果” comparison：nl {statement}
-        elif self.checkToken(TokenType.IF):
-            parseLogger.info("陈述-如果 (STATEMENT-IF)")
-            self.nextToken()
+        elif self.isCurTokenOfKind(TokenType.IF):
+            parseLogger.info("STATEMENT-IF")
+
             self.emitter.emit("if ")
+            self.nextToken()
             self.expression()
 
             self.match(TokenType.COLON)
             self.emitter.emit(":")
 
             self.nl()
-        
-            if self.checkToken(TokenType.SPACE) and self.curToken.count > indentationSize:
-                statementIndentSize = self.curToken.count
 
-                # Zero or more statements in the body.
-                while self.checkToken(TokenType.SPACE) and self.curToken.count == statementIndentSize:
-                    self.emitter.emit(" " * statementIndentSize)
-                    self.statement(statementIndentSize)
-            else:
-                self.abort('缩进错误：在\'如果\'语句后需要一个缩进块 (IndentatilonError: expected an indented block after \'if\' statement)')
+            self.parseStatementsInBlock(indentationSize + 1)
+
+            # One or more optional 'elif' blocks
+            while self.hasIndentation(indentationSize) and\
+                ((indentationSize == 0 and self.isCurTokenOfKind(TokenType.ELIF))\
+                 or (indentationSize > 0 and self.isPeekTokenOfKind(TokenType.ELIF))):
+                parseLogger.info("STATEMENT-ELIF")
+
+                if indentationSize > 0:
+                    self.nextToken()
+                self.emitter.emit(" " * indentationSize + "elif ")
+                self.nextToken()
+                self.expression()
+
+                self.match(TokenType.COLON)
+                self.emitter.emit(":")
+
+                self.nl()
+
+                self.parseStatementsInBlock(indentationSize + 1)
+
+            # Optional 'else' block
+            if self.hasIndentation(indentationSize) and\
+                ((indentationSize == 0 and self.isCurTokenOfKind(TokenType.ELSE))\
+                 or (indentationSize > 0 and self.isPeekTokenOfKind(TokenType.ELSE))):
+                parseLogger.info("STATEMENT-ELSE")
+                
+                if indentationSize > 0:
+                    self.nextToken()
+                self.emitter.emit(" " * indentationSize + "else")
+                self.nextToken()
+
+                self.match(TokenType.COLON)
+                self.emitter.emit(":")
+
+                self.nl()
+
+                self.parseStatementsInBlock(indentationSize + 1)
 
         # “当” comparison：nl {statement}
-        elif self.checkToken(TokenType.WHILE):
+        elif self.isCurTokenOfKind(TokenType.WHILE):
             parseLogger.info("陈述-当 (STATEMENT-WHILE)")
 
             self.nextToken()
@@ -182,18 +235,18 @@ class Parser:
 
             self.nl()
 
-            if self.checkToken(TokenType.SPACE) and self.curToken.count > indentationSize:
+            if self.isCurTokenOfKind(TokenType.SPACE) and self.curToken.count > indentationSize:
                 statementIndentSize = self.curToken.count
 
                 # Zero or more statements in the loop body.
-                while self.checkToken(TokenType.SPACE) and self.curToken.count == statementIndentSize:
+                while self.isCurTokenOfKind(TokenType.SPACE) and self.curToken.count == statementIndentSize:
                     self.emitter.emit(" " * statementIndentSize)
                     self.statement(statementIndentSize)
             else:
                 self.abort('缩进错误：在\'当\'语句后需要一个缩进块 (IndentationError: expected an indented block after \'while\' statement)')
 
         # Variable Assignment: ident "=" expression + nl
-        elif self.checkToken(TokenType.IDENT) and self.peekToken.kind == TokenType.EQ:
+        elif self.isCurTokenOfKind(TokenType.IDENT) and self.peekToken.kind == TokenType.EQ:
             parseLogger.info("陈述-变量赋值 (STATEMENT-VARIABLE ASSIGNMENT)")
 
             variable = getAlphaNumericVar(self.curToken.text)
@@ -211,6 +264,10 @@ class Parser:
                 self.symbols.add(variable)
 
             self.nl()
+
+        # Missing 'if' statement
+        elif self.isCurTokenOfKind(TokenType.ELSE):
+            self.abort("SyntaxError: invalid syntax")
 
         else:
             self.expression()
@@ -230,13 +287,13 @@ class Parser:
 
         self.term()
         # Can have 0 or more +,-,==,!=,>,>=,<,<=,与,或 expressions.
-        while self.checkToken(TokenType.PLUS)\
-                or self.checkToken(TokenType.MINUS)\
+        while self.isCurTokenOfKind(TokenType.PLUS)\
+                or self.isCurTokenOfKind(TokenType.MINUS)\
                 or self.isComparisonOperator()\
-                or self.checkToken(TokenType.AND) or self.checkToken(TokenType.OR):
-            if self.checkToken(TokenType.AND):
+                or self.isCurTokenOfKind(TokenType.AND) or self.isCurTokenOfKind(TokenType.OR):
+            if self.isCurTokenOfKind(TokenType.AND):
                 self.emitter.emit(" and ")
-            elif self.checkToken(TokenType.OR):
+            elif self.isCurTokenOfKind(TokenType.OR):
                 self.emitter.emit(" or ")
             else:
                 self.emitter.emit(self.curToken.text)
@@ -252,7 +309,7 @@ class Parser:
 
         self.unary()
         # Can have 0 or more *// expressions.
-        while self.checkToken(TokenType.ASTERISK) or self.checkToken(TokenType.SLASH):
+        while self.isCurTokenOfKind(TokenType.ASTERISK) or self.isCurTokenOfKind(TokenType.SLASH):
             self.emitter.emit(self.curToken.text)
             self.nextToken()
             self.unary()
@@ -265,10 +322,10 @@ class Parser:
         parseLogger.info("UNARY")
 
         # Optional unary +/-/非
-        if self.checkToken(TokenType.PLUS)\
-            or self.checkToken(TokenType.MINUS)\
-            or self.checkToken(TokenType.NOT):
-            if self.checkToken(TokenType.NOT):
+        if self.isCurTokenOfKind(TokenType.PLUS)\
+            or self.isCurTokenOfKind(TokenType.MINUS)\
+            or self.isCurTokenOfKind(TokenType.NOT):
+            if self.isCurTokenOfKind(TokenType.NOT):
                 self.emitter.emit("not ")
             else:
                 self.emitter.emit(self.curToken.text)
@@ -282,10 +339,10 @@ class Parser:
         """
         parseLogger.info("PRIMARY")
 
-        if self.checkToken(TokenType.NUMBER): 
+        if self.isCurTokenOfKind(TokenType.NUMBER): 
             self.emitter.emit(self.curToken.text)
             self.nextToken()
-        elif self.checkToken(TokenType.IDENT):
+        elif self.isCurTokenOfKind(TokenType.IDENT):
             # Ensure the variable already exists.
             variable = getAlphaNumericVar(self.curToken.text)
             if variable not in self.symbols:
@@ -293,7 +350,7 @@ class Parser:
 
             self.emitter.emit(variable)
             self.nextToken()
-        elif self.checkToken(TokenType.OPEN_BRACKET):
+        elif self.isCurTokenOfKind(TokenType.OPEN_BRACKET):
             self.emitter.emit(self.curToken.text)
             self.nextToken()
 
@@ -317,5 +374,5 @@ class Parser:
         self.emitter.emitLine("")
 
         # But we will allow extra newlines too, of course.
-        while self.checkToken(TokenType.NEWLINE):
+        while self.isCurTokenOfKind(TokenType.NEWLINE):
             self.nextToken()

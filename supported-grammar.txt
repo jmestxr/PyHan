@@ -8,7 +8,7 @@
     # if/elif/else
     “如果” comparison：nl
     {statement}
-    "但如" comparison：nl
+    "或则" comparison：nl
     {statement}
     “否则”：nl
     {statement}
