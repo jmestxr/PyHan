@@ -3,7 +3,13 @@ from pypinyin import pinyin, Style
 from lex import Lexer
 import hashlib
 
-def getAlphaNumericVar(var):
+def getAlphaNumericVar(var: str) -> None:
+    """
+    Return a variable name that is alphanumeric.
+    
+    Parameters:
+    var (str): The variable name to convert.
+    """
     if not Lexer.ischinese(var):
         return var
     

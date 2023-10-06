@@ -3,7 +3,14 @@ from emit import *
 from parse import *
 import sys
 
-def compile(inputFile, outputFile):
+def compile(inputFile: str, outputFile: str) -> None:
+    """
+    Compiles the source file into the target file.
+    
+    Parameters:
+        inputFile (str): The path to the source file.
+        outputFile (str): The path to the target file.
+    """
     if not inputFile or not outputFile:
         sys.exit("Error: Compiler needs both source file and output file as argument.")
 

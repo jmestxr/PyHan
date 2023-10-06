@@ -5,7 +5,15 @@ import sys
 import io
 import tempfile
 
-def compile(inputString):
+def compile(inputString: str) -> str:
+    """
+    Compiles the input pyhan code into python code.
+    
+    Parameters:
+        inputString (str): The input pyhan code.
+    Returns:
+        str: The compiled python code.
+    """
     inputFile = io.StringIO(inputString)
     outputFile = tempfile.NamedTemporaryFile()
     source = ""

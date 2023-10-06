@@ -1,19 +1,19 @@
 import sys
 import os
-from tokenize import TokenError
+from lex import *
+from src.emit import Emitter
+from utils import getAlphaNumericVar
 
 # appending the directory of parseLogger.py in the sys.path list
 sys.path.append(f"{os.path.dirname(__file__)}/../log")   
 
-from lex import *
-from utils import getAlphaNumericVar
 from parseLogger import parseLogger
 
 class Parser:
     """
     Parser object keeps track of current token and checks if the code matches the grammar.
     """
-    def __init__(self, lexer, emitter):
+    def __init__(self, lexer: Lexer, emitter: Emitter):
         self.lexer = lexer
         self.emitter = emitter
 
@@ -24,27 +24,42 @@ class Parser:
         self.nextToken()
         self.nextToken()    # Call this twice to initialize current and peek.
     
-    def isCurTokenOfKind(self, kind):
+    def isCurTokenOfKind(self, kind: TokenType) -> bool:
         """
         Return true if the current token matches.
+
+        Parameters:
+        kind (TokenType): The token type to compare with.
         """
         return kind == self.curToken.kind
 
-    def isPeekTokenOfKind(self, kind):
+    def isPeekTokenOfKind(self, kind: TokenType):
         """
         Return true if the next token matches.
+
+        Parameters:
+        kind (TokenType): The token type to compare with.
         """
         return kind == self.peekToken.kind
 
-    def match(self, kind):
+    def match(self, kind: TokenType) -> None:
         """
         Try to match current token. If not, error. Advances the current token.
+
+        Parameters:
+        kind (TokenType): The token type to match.
         """
         if not self.isCurTokenOfKind(kind):
             self.abort("Expected " + kind.name + ", got " + self.curToken.kind.name)
         self.nextToken()
 
-    def hasIndentation(self, indentationSize):
+    def hasIndentation(self, indentationSize: int) -> bool:
+        """
+        Return true if the current token is of the specified indentation size.
+
+        Parameters:
+        indentationSize (int): The expected indentation size.
+        """
         if indentationSize == 0:
             if self.isCurTokenOfKind(TokenType.SPACE):
                 return False
@@ -54,7 +69,14 @@ class Parser:
             return False
         return True
 
-    def hasIndentationOrAbort(self, indentationSize):
+    def hasIndentationOrAbort(self, indentationSize: int) -> None:
+        """
+        Check if the current token is of the specified indentation size.
+        If so, advance to next token. If not, abort.
+
+        Parameters:
+        indentationSize (int): The expected indentation size.
+        """
         if indentationSize == 0:
             if self.isCurTokenOfKind(TokenType.SPACE):
                 self.abort("Unexpected indentation at " + self.curToken.text)
@@ -78,19 +100,19 @@ class Parser:
             and self.isLogicalOperator(self.peekToken):
             self.abort("SyntaxError: invalid syntax")
 
-    def isComparisonOperator(self):
+    def isComparisonOperator(self) -> bool:
         """
         Return true if the current token is a comparison operator.
         """
         return self.isCurTokenOfKind(TokenType.GT) or self.isCurTokenOfKind(TokenType.GTEQ) or self.isCurTokenOfKind(TokenType.LT) or self.isCurTokenOfKind(TokenType.LTEQ) or self.isCurTokenOfKind(TokenType.EQEQ) or self.isCurTokenOfKind(TokenType.NOTEQ)
 
-    def isArithmeticOperator(self):
+    def isArithmeticOperator(self) -> bool:
         """
         Return true if the current token is a arithmetic operator.
         """
         return self.isCurTokenOfKind(TokenType.PLUS) or self.isCurTokenOfKind(TokenType.MINUS) or self.isCurTokenOfKind(TokenType.ASTERISK) or self.isCurTokenOfKind(TokenType.SLASH)
 
-    def isLogicalOperator(self, token):
+    def isLogicalOperator(self, token) -> bool:
         """
         Return true if the specified token is a logical operator.
         """
@@ -112,13 +134,19 @@ class Parser:
         else:
             self.abort("IndentationError: expected an indented block")
 
-    def abort(self, message):
+    def abort(self, message: str) -> None:
+        """
+        Abort the parser.
+
+        Parameters:
+        message (str): The error message to display.
+        """
         sys.exit("Error. " + message)
         
 
     # Production rules.
 
-    def program(self):
+    def program(self) -> None:
         """
         program ::= {statement}
         """
@@ -293,7 +321,7 @@ class Parser:
             self.nl()
 
 
-    def expression(self):
+    def expression(self) -> None:
         """
         Any of the following:
         - expression ::= term {( "-" | "+" ) term}
@@ -320,7 +348,7 @@ class Parser:
             self.term()
 
 
-    def term(self):
+    def term(self) -> None:
         """
         term ::= unary {( "/" | "*" ) unary}
         """
@@ -334,7 +362,7 @@ class Parser:
             self.unary()
 
 
-    def unary(self):
+    def unary(self) -> None:
         """
         unary ::= ["+" | "-" | "非"] primary
         """
@@ -352,7 +380,7 @@ class Parser:
         self.primary()
 
 
-    def primary(self):
+    def primary(self) -> None:
         """
         primary ::= number | ident | LPAREN expr RPAREN
         """
@@ -382,7 +410,7 @@ class Parser:
             self.abort("Unexpected token at " + self.curToken.text)
 
 
-    def nl(self):
+    def nl(self) -> None:
         """
         nl ::= '\n'+
         """

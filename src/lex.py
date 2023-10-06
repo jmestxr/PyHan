@@ -3,49 +3,66 @@ import sys
 import re
 
 class Lexer:
-    def __init__(self, input):
+    def __init__(self, input: str):
         self.source = input + '\n' # Source code to lex as a string. Append a newline to simplify lexing/parsing the last token/statement.
         self.curChar = ''   # Current character in the string.
         self.curPos = -1    # Current position in the string.
         self.nextChar()
 
-    # Process the next character.
-    def nextChar(self):
+    def nextChar(self) -> None:
+        """
+        Process the next character.
+        """
         self.curPos += 1
         if self.curPos >= len(self.source):
             self.curChar = '\0'  # EOF
         else:
             self.curChar = self.source[self.curPos]
 
-    # Return the lookahead character.
-    def peekForward(self):
+    def peekForward(self) -> None:
+        """
+        Return the lookahead character.
+        """
         if self.curPos + 1 >= len(self.source):
             return '\0'
         return self.source[self.curPos + 1]
     
-    # Return the lookbackward character.
-    def peekBackward(self):
+    def peekBackward(self) -> None:
+        """
+        Return the lookbackward character.
+        """
         if self.curPos <= 0 or self.curPos > len(self.source):
             return None
         return self.source[self.curPos - 1]
 
-    # Invalid token found, print error message and exit.
-    def abort(self, message):
+    def abort(self, message: str) -> None:
+        """
+        Display an error message and exit if an invalid token is found.
+        
+        Parameters:
+        message (str): The error message to display.
+        """
         sys.exit("Lexing error. " + message)
 		
-    # Skip whitespace except newlines, which we will use to indicate the end of a statement.
-    def skipWhitespace(self):
+    def skipWhitespace(self) -> None:
+        """
+        Skip whitespace except newlines, which we will use to indicate the end of a statement.
+        """
         while Lexer.isspace(self.curChar):
             self.nextChar()
 		
-    # Skip comments in the code.
-    def skipComment(self):
+    def skipComment(self) -> None:
+        """
+        Skip comments in the code.
+        """
         if self.curChar == '#':
             while self.curChar != '\n':
                 self.nextChar()
 
-    # Return the next token.
-    def getToken(self):
+    def getToken(self) -> None:
+        """
+        Return the next token.
+        """
         if self.peekBackward() and self.peekBackward() != '\n':
             self.skipWhitespace()
 
@@ -167,24 +184,38 @@ class Lexer:
         return token
     
     @staticmethod
-    def ischinese(char):
+    def ischinese(char) -> bool:
+        """
+        Check if a character is Chinese.
+        """
         return len(re.findall(r'[\u4e00-\u9fff]+', char)) > 0
     
     @staticmethod
-    def iscolon(char):
+    def iscolon(char) -> bool:
+        """
+        Check if a character is colon.
+        """
         return char == ':'
     
     @staticmethod
-    def isquote(char):
+    def isquote(char) -> bool:
+        """
+        Check if a character is quote.
+        """
         return char == '\"'
     
     @staticmethod
-    def isspace(char):
+    def isspace(char) -> bool:
+        """
+        Check if a character is space.
+        """
         return char == ' ' or char == '\t' or char == '\r'
     
     
-# Token contains the original text, type of token and number of tokens.
-class Token:   
+class Token:
+    """
+    Token contains the original text, type of token and number of tokens.
+    """   
     def __init__(self, tokenText, tokenKind, numTokens = 1):
         self.text = tokenText   # The token's actual text. Used for identifiers, strings, and numbers.
         self.kind = tokenKind   # The TokenType that this token is classified as.
@@ -207,41 +238,43 @@ class Token:
         return None
 
 
-# TokenType is our enum for all the types of tokens.
 class TokenType(enum.Enum):
-	EOF = -1
-	NEWLINE = 0
-	SPACE = 1
-	COLON = 2
-	OPEN_BRACKET = 3
-	CLOSE_BRACKET = 4
-	NUMBER = 5
-	IDENT = 6
-	STRING = 7
+    """
+    Enum for all the types of tokens.
+    """
+    EOF = -1
+    NEWLINE = 0
+    SPACE = 1
+    COLON = 2
+    OPEN_BRACKET = 3
+    CLOSE_BRACKET = 4
+    NUMBER = 5
+    IDENT = 6
+    STRING = 7
 	# Keywords.
-	PRINT = 101
-	IF = 102
-	ELIF = 103
-	ELSE = 104
-	WHILE = 105
-	BREAK = 106
-	CONTINUE = 107
+    PRINT = 101
+    IF = 102
+    ELIF = 103
+    ELSE = 104
+    WHILE = 105
+    BREAK = 106
+    CONTINUE = 107
 	# Operators.
-	EQ = 201  
-	PLUS = 202
-	MINUS = 203
-	ASTERISK = 204
-	SLASH = 205
-	EQEQ = 206
-	NOTEQ = 207
-	LT = 208
-	LTEQ = 209
-	GT = 210
-	GTEQ = 211
+    EQ = 201  
+    PLUS = 202
+    MINUS = 203
+    ASTERISK = 204
+    SLASH = 205
+    EQEQ = 206
+    NOTEQ = 207
+    LT = 208
+    LTEQ = 209
+    GT = 210
+    GTEQ = 211
     # Logical Operators.
-	AND = 301
-	OR = 302
-	NOT = 303
+    AND = 301
+    OR = 302
+    NOT = 303
 
 ChineseKeywords = {
     "PRINT": "印出",
