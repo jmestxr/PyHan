@@ -224,6 +224,8 @@ class TokenType(enum.Enum):
 	ELIF = 103
 	ELSE = 104
 	WHILE = 105
+	BREAK = 106
+	CONTINUE = 107
 	# Operators.
 	EQ = 201  
 	PLUS = 202
@@ -246,7 +248,9 @@ ChineseKeywords = {
     "IF": "如果",
     "ELIF": "或则",
     "ELSE": "否则",
-    "WHILE": "当"
+    "WHILE": "当",
+    "BREAK": "中断",
+    "CONTINUE": "继续"
 }
 
 ChineseLogicalOperators = {

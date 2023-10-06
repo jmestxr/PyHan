@@ -31,6 +31,7 @@ Here are the list of syntax currently supported:
 - `print` statement - `印出`
 - `if/elif/else` block - `如果/或则/否则`
 - `while` loop - `当`
+- `break`, `continue` statements in loop - `中断`, `继续`
 - Logical operators (`and`, `or`, `not`) - `与`, `或`, `非`
 - Variable assignment
 - Declaring variables in Chinese characters

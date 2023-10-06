@@ -96,18 +96,19 @@ class Parser:
         """
         return token.kind == TokenType.AND or token.kind == TokenType.OR or token.kind == TokenType.NOT
 
-    def parseStatementsInBlock(self, indentationSize: int) -> None:
+    def parseStatementsInBlock(self, indentationSize: int, isInLoop: bool = False) -> None:
         """Get statements in a block.
 
         Parameters:
         indentationSize (int): The minimum indentation size of each statement.
+        isInLoop (bool): If the block is in a loop (e.g. 'while', 'for').
         """
         if self.isCurTokenOfKind(TokenType.SPACE) and self.curToken.count >= indentationSize:
                 statementIndentSize = self.curToken.count
 
                 # One or more statements in the body.
                 while self.isCurTokenOfKind(TokenType.SPACE) and self.curToken.count == statementIndentSize:
-                    self.statement(statementIndentSize)
+                    self.statement(statementIndentSize, isInLoop)
         else:
             self.abort("IndentationError: expected an indented block")
 
@@ -132,7 +133,7 @@ class Parser:
             self.statement()
             
 
-    def statement(self, indentationSize = 0):
+    def statement(self, indentationSize: int = 0, isInLoop: bool = False) -> None:
         """
         One of the following statements...
         - PRINT: “印出”（ expression | string ）+ nl
@@ -140,6 +141,10 @@ class Parser:
         - WHILE: “当” comparison：nl {statement}
         - VARIABLE ASSIGNMENT: ident "=" expression + nl
         - EXPRESSION
+
+        Parameters:
+        indentationSize (int): The expected indentation size of the statement.
+        isInLoop (bool): If the statement is in a loop (e.g. 'while', 'for').
         """
         # Check that the number of spaces at beginning of statement
         # corresponds to expected indentation size
@@ -235,15 +240,7 @@ class Parser:
 
             self.nl()
 
-            if self.isCurTokenOfKind(TokenType.SPACE) and self.curToken.count > indentationSize:
-                statementIndentSize = self.curToken.count
-
-                # Zero or more statements in the loop body.
-                while self.isCurTokenOfKind(TokenType.SPACE) and self.curToken.count == statementIndentSize:
-                    self.emitter.emit(" " * statementIndentSize)
-                    self.statement(statementIndentSize)
-            else:
-                self.abort('缩进错误：在\'当\'语句后需要一个缩进块 (IndentationError: expected an indented block after \'while\' statement)')
+            self.parseStatementsInBlock(indentationSize + 1, True)
 
         # Variable Assignment: ident "=" expression + nl
         elif self.isCurTokenOfKind(TokenType.IDENT) and self.peekToken.kind == TokenType.EQ:
@@ -266,9 +263,31 @@ class Parser:
             self.nl()
 
         # Missing 'if' statement
-        elif self.isCurTokenOfKind(TokenType.ELSE):
+        elif self.isCurTokenOfKind(TokenType.ELIF) or self.isCurTokenOfKind(TokenType.ELSE):
             self.abort("SyntaxError: invalid syntax")
 
+        # 'break' statement
+        elif self.isCurTokenOfKind(TokenType.BREAK):
+            parseLogger.info("STATEMENT-BREAK")
+
+            if not isInLoop:
+                self.abort("SyntaxError: 'break' outside loop")
+
+            self.emitter.emit("break")
+            self.nextToken()
+            self.nl()
+
+        # 'continue' statement
+        elif self.isCurTokenOfKind(TokenType.CONTINUE):
+            parseLogger.info("STATEMENT-CONTINUE")
+
+            if not isInLoop:
+                self.abort("SyntaxError: 'continue' outside loop")
+                
+            self.emitter.emit("continue")
+            self.nextToken()
+            self.nl()
+            
         else:
             self.expression()
             self.nl()
