@@ -1,5 +1,7 @@
 # Py汉 (PyHan), a.k.a. Chinese Python
 
+![code-cov](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/jmestxr/f5603eab65a4459378427cb20d30ecae/raw/covbadge.json)
+
 (This project is still Work in Progress)
 
 Write and execute Python code in Simplified Chinese syntax!
