@@ -5,6 +5,16 @@ import sys
 sys.path.append(f"{os.path.dirname(__file__)}/../src")   
 from mocks import mock_compiler
 
+def test_printNumber():
+    input = """\
+印出(-1)\
+"""
+    actual = mock_compiler.compile(input)
+    expected = """\
+print(-1)
+"""
+    assert actual == expected
+
 def test_printArithmetic():
     input = """\
 印出((5+2-3))\
@@ -13,7 +23,6 @@ def test_printArithmetic():
     expected = """\
 print((5+2-3))
 """
-    
     assert actual == expected
 
 def test_printEnglishString():
@@ -24,7 +33,6 @@ def test_printEnglishString():
     expected = """\
 print("hello world!")
 """
-    
     assert actual == expected
 
 def test_printChineseString():
@@ -35,7 +43,16 @@ def test_printChineseString():
     expected = """\
 print("你好世界！")
 """
-    
+    assert actual == expected
+
+def test_printBoolean():
+    input = """\
+印出(真)\
+"""
+    actual = mock_compiler.compile(input)
+    expected = """\
+print(True)
+"""
     assert actual == expected
 
 def test_printEnglishVariable():
@@ -48,7 +65,6 @@ number = 1
 number=1
 print(number)
 """
-
     assert actual == expected
 
 def test_printChineseVariable():
@@ -61,5 +77,4 @@ def test_printChineseVariable():
 shumu_2587044c9663e086a82fb5ad144e94493ee7e879169936b5a615c0ae047e7d15=1
 print(shumu_2587044c9663e086a82fb5ad144e94493ee7e879169936b5a615c0ae047e7d15)
 """
-    
     assert actual == expected

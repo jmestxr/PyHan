@@ -144,7 +144,7 @@ class Lexer:
             token = Token(tokText, TokenType.NUMBER)
         elif Lexer.ischinese(self.curChar) or self.curChar.isalpha():
             # Leading character is an English or Chinese character, 
-            # so this must be an identifier or a keyword.
+            # so this must be an identifier, keyword, logical operator or boolean.
             # Get all consecutive chinese/alpha/numeric characters.
             startPos = self.curPos
             while Lexer.ischinese(self.peekForward()) or self.peekForward().isalnum():
@@ -154,10 +154,13 @@ class Lexer:
             tokText = self.source[startPos : self.curPos + 1] # Get the substring.
             keyword = Token.checkIfKeyword(tokText)
             logicalOperator = Token.checkIfLogicalOperator(tokText)
+            boolean = Token.checkIfBoolean(tokText)
             if keyword: # Keyword
                 token = Token(tokText, keyword)
             elif logicalOperator: # Logical Operator
                 token = Token(tokText, logicalOperator)
+            elif boolean: # Boolean
+                token = Token(tokText, boolean)
             else:   # Identifier
                 token = Token(tokText, TokenType.IDENT)
         elif self.curChar == '\n':
@@ -233,7 +236,15 @@ class Token:
     def checkIfLogicalOperator(tokenText):
         for kind in TokenType:
             # Relies on all keyword enum values being 3XX.
-            if kind.value >= 300 and ChineseLogicalOperators[kind.name] == tokenText:
+            if kind.value >= 300 and kind.value < 400 and ChineseLogicalOperators[kind.name] == tokenText:
+                return kind
+        return None
+    
+    @staticmethod
+    def checkIfBoolean(tokenText):
+        for kind in TokenType:
+            # Relies on all keyword enum values being 404 or 405.
+            if (kind.value == 404 or kind.value == 405) and ChineseBoolean[kind.name] == tokenText:
                 return kind
         return None
 
@@ -242,15 +253,13 @@ class TokenType(enum.Enum):
     """
     Enum for all the types of tokens.
     """
+    # Special tokens.
     EOF = -1
     NEWLINE = 0
     SPACE = 1
     COLON = 2
     OPEN_BRACKET = 3
     CLOSE_BRACKET = 4
-    NUMBER = 5
-    IDENT = 6
-    STRING = 7
 	# Keywords.
     PRINT = 101
     IF = 102
@@ -275,6 +284,13 @@ class TokenType(enum.Enum):
     AND = 301
     OR = 302
     NOT = 303
+    # Primitives
+    NUMBER = 401
+    STRING = 403
+    TRUE = 404
+    FALSE = 405
+    # Identifiers / Variables.
+    IDENT = 501
 
 ChineseKeywords = {
     "PRINT": "印出",
@@ -290,4 +306,9 @@ ChineseLogicalOperators = {
     "AND": "与",
     "OR": "或",
     "NOT": "非"
+}
+
+ChineseBoolean = {
+    "TRUE": "真",
+    "FALSE": "假"
 }

@@ -188,15 +188,10 @@ class Parser:
             self.nextToken()
             self.match(TokenType.OPEN_BRACKET)
 
-            if self.isCurTokenOfKind(TokenType.STRING):
-                # Simple string.
-                self.emitter.emit("print(\"" + self.curToken.text + "\")")
-                self.nextToken()
-            else:
-                # Expect an expression.
-                self.emitter.emit("print(")
-                self.expression()
-                self.emitter.emit(")")
+            # Expect an expression.
+            self.emitter.emit("print(")
+            self.expression()
+            self.emitter.emit(")")
             
             self.match(TokenType.CLOSE_BRACKET)
             
@@ -382,12 +377,25 @@ class Parser:
 
     def primary(self) -> None:
         """
-        primary ::= number | ident | LPAREN expr RPAREN
+        primary ::= primitive | ident | LPAREN expr RPAREN
+        primitive ::= number | string | boolean
         """
         parseLogger.info("PRIMARY")
 
         if self.isCurTokenOfKind(TokenType.NUMBER): 
             self.emitter.emit(self.curToken.text)
+            self.nextToken()
+        elif self.isCurTokenOfKind(TokenType.STRING):
+            # Simple string.
+            self.emitter.emit(f"\"{self.curToken.text}\"")
+            self.nextToken()
+        elif self.isCurTokenOfKind(TokenType.TRUE):
+            # Boolean (true)
+            self.emitter.emit("True")
+            self.nextToken()
+        elif self.isCurTokenOfKind(TokenType.FALSE):
+            # Boolean (false)
+            self.emitter.emit("False")
             self.nextToken()
         elif self.isCurTokenOfKind(TokenType.IDENT):
             # Ensure the variable already exists.

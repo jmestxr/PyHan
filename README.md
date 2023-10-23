@@ -35,6 +35,7 @@ Here are the list of syntax currently supported:
 - `while` loop - `当`
 - `break`, `continue` statements in loop - `中断`, `继续`
 - Logical operators (`and`, `or`, `not`) - `与`, `或`, `非`
+- Primitives ( number, string, boolean (`真`,`假`) )
 - Variable assignment
 - Declaring variables in Chinese characters
 - Basic arithmetic (`+`, `-`, `*`, `/`)
