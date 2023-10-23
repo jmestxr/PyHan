@@ -99,3 +99,7 @@ Run `python cli/pyhan_cli.py test.pyhan -c`. Compiled python script will be in `
 Unit test cases are written with pytest. All test files are stored in `/test` directory. 
 
 Run `pytest` to run all tests.
+
+Run `pytest --cov` to get code coverage.
+
+Run `pytest --cov --cov-report term-missing` to get code coverage and lines missed.
